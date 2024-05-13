@@ -1,9 +1,14 @@
 
 %{
 #include <stdio.h>
+#include "calc.tab.h"
 %}
 
+%option yylineno
+
 %%
+
+[ \t\r\n] { /* ignora */ }
 
 "//".*\n { /* ignora */ }
 
@@ -37,7 +42,29 @@
 
 %%
 
-int main() {
+int yywrap() {
+    return 1;
+}
 
+int main(int argc, char *argv[]) {
+    
+    if (argc <= 1) {
+        printf("Sintaxe: %s nome_do_programa\n",
+            argv[0]);
+        return 1;
+    }
+
+    yyin = fopen(argv[1], "r");
+    if (yyin == NULL) {
+        printf("Não foi possível abrir o arquivo %s.\n", argv[1]);
+        return 1;
+    }
+
+    yyparse();
+
+    if (yyin)
+        fclose(yyin);
+    
+    return 0;
 }
 
