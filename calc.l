@@ -2,6 +2,9 @@
 %{
 #include <stdio.h>
 #include "calc.tab.h"
+
+int yyerror(const char *s);
+
 %}
 
 %option yylineno
@@ -46,6 +49,12 @@ int yywrap() {
     return 1;
 }
 
+int yyerror(const char *s) {
+    printf("Erro de sintaxe na linha %d: %s\n", 
+        yylineno, s);
+    return 1;
+}
+
 int main(int argc, char *argv[]) {
     
     if (argc <= 1) {
@@ -67,4 +76,6 @@ int main(int argc, char *argv[]) {
     
     return 0;
 }
+
+
 
