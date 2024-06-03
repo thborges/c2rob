@@ -14,6 +14,9 @@ public:
     virtual string toStr() {
         return "node";
     }
+    void append(Node *n) {
+        children.push_back(n);
+    }
 };
 
 class Integer : public Node {
@@ -48,6 +51,21 @@ protected:
 public:
     Ident(const string n) {
         name = n;
+    }
+
+    virtual string toStr() override {
+        return name;
+    }
+};
+
+class Variable : public Node {
+protected:
+    string name;
+    Node *value;
+public:
+    Variable(const string n, Node *v) {
+        name = n;
+        value = v;
     }
 
     virtual string toStr() override {
@@ -93,7 +111,7 @@ public:
     }
 };
 
-class Print {
+class Print : public Node {
 protected:
     Node *value;
 
