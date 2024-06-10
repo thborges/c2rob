@@ -55,9 +55,12 @@ int yywrap() {
     return 1;
 }
 
+extern int errorcount;
+
 int yyerror(const char *s) {
-    printf("Erro de sintaxe na linha %d: %s\n", 
+    printf("falha.txt:%d:0: %s\n", 
         yylineno, s);
+    errorcount++;
     return 1;
 }
 

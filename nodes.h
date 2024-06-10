@@ -4,6 +4,8 @@
 #include <map>
 #include <set>
 
+extern int errorcount;
+
 using namespace std;
 
 class Node {
@@ -63,6 +65,10 @@ public:
         name = n;
     }
 
+    const string getName() {
+        return name;
+    }
+
     virtual string toStr() override {
         return name;
     }
@@ -77,6 +83,10 @@ public:
         name = n;
         value = v;
         children.push_back(v);
+    }
+
+    const string getName() {
+        return name;
     }
 
     virtual string toStr() override {
@@ -161,4 +171,32 @@ void printf_tree(Node *root) {
     cout << "}" << endl;
 }
 
+class CheckVarDecl {
+private:
+    set<string> symbols;
+public:
+    CheckVarDecl() {}
+
+    void check(Node *noh) {
+        for(Node *c : noh->getChildren()) {
+            check(c);
+        }
+
+        Ident *id = dynamic_cast<Ident*>(noh);
+        if (id) {
+            if (symbols.count(id->getName()) <= 0) {
+                cout << "Semantic error: " 
+                     << id->getName()
+                     << " undefined."
+                     << endl;
+                errorcount++;
+            }
+        }
+
+        Variable *var = dynamic_cast<Variable*>(noh);
+        if (var) {
+            symbols.insert(var->getName());
+        }
+    }
+};
 
