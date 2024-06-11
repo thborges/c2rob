@@ -5,14 +5,23 @@
 #include <set>
 
 extern int errorcount;
+extern int yylineno;
+extern char *build_file_name;
 
 using namespace std;
 
 class Node {
 protected:
     vector<Node*> children;
+    int lineno;
 
 public:
+    Node() {
+        lineno = yylineno;
+    }
+    int getLineNo() {
+        return lineno;
+    }
     virtual string toStr() {
         return "stmts";
     }
@@ -185,7 +194,10 @@ public:
         Ident *id = dynamic_cast<Ident*>(noh);
         if (id) {
             if (symbols.count(id->getName()) <= 0) {
-                cout << "Semantic error: " 
+                cout << build_file_name
+                     << ":"
+                     << id->getLineNo()
+                     << ":0: semantic error: " 
                      << id->getName()
                      << " undefined."
                      << endl;

@@ -5,6 +5,7 @@
 int yyerror(const char *s);
 int yylex(void);
 int errorcount = 0;
+extern bool force_print_tree;
 %}
 
 %define parse.error verbose
@@ -40,7 +41,7 @@ program : globals {
 
     if (errorcount > 0)
         cout << errorcount << " error(s) found." << endl;
-    else
+    if (errorcount == 0 || force_print_tree) 
         printf_tree(program);
 }
 
@@ -63,6 +64,8 @@ global : TOK_PRINT TOK_IDENT ';' {
     Ident *id = new Ident($TOK_IDENT);
     $$ = new Print(id);
 }
+
+global : error ';' { $$ = new Node(); }
 
 expr : expr[ee] '+' term {
     $$ = new BinaryOp($ee, $term, '+');
