@@ -58,6 +58,7 @@ int yywrap() {
 }
 
 extern int errorcount;
+extern int yydebug;
 
 int yyerror(const char *s) {
     printf("%s:%d:0: %s\n", 
@@ -88,6 +89,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    yydebug = 1;
     yyparse();
 
     if (yyin)

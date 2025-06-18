@@ -9,6 +9,7 @@ extern bool force_print_tree;
 %}
 
 %define parse.error verbose
+%define parse.trace
 
 %union {
     char *str;
@@ -27,6 +28,13 @@ extern bool force_print_tree;
 %type<flt> TOK_FLOAT
 %type<node> globals global expr term factor unary
 
+%printer { fprintf(yyo, "%s", $$); } <str>
+%printer { fprintf(yyo, "%d", $$); } <itg>
+%printer { fprintf(yyo, "%lf", $$); } <flt>
+
+%printer { fprintf(yyo, "%s",
+    $$->toDebug().c_str()); } <node>
+
 %start program
 
 %%
@@ -38,6 +46,9 @@ program : globals {
     // aqui vai a analise semantica
     CheckVarDecl cvd;
     cvd.check(program);
+
+    CheckVarTypeMixed cvt;
+    cvt.check(program);
 
     if (errorcount > 0)
         cout << errorcount << " error(s) found." << endl;

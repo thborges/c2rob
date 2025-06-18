@@ -25,6 +25,9 @@ public:
     virtual string toStr() {
         return "stmts";
     }
+    virtual string toDebug() {
+        return toStr();
+    }
     void append(Node *n) {
         children.push_back(n);
     }
@@ -101,6 +104,10 @@ public:
     virtual string toStr() override {
         return name + "=";
     }
+
+    virtual string toDebug() override {
+        return name + "=" + value->toDebug();
+    }
 };
 
 class Unary : public Node {
@@ -119,6 +126,10 @@ public:
         string aux;
         aux.push_back(operation);
         return aux;
+    }
+
+    virtual string toDebug() override {
+        return toStr() + value->toDebug();
     }
 };
 
@@ -142,6 +153,11 @@ public:
         aux.push_back(operation);
         return aux;
     }
+
+    virtual string toDebug() override {
+        return value1->toDebug() + toStr() +
+            value2->toDebug();
+    }
 };
 
 class Print : public Node {
@@ -154,8 +170,12 @@ public:
         children.push_back(v);
     }
 
-    virtual string toStr() {
+    virtual string toStr() override {
         return "print";
+    }
+
+    virtual string toDebug() override {
+        return toStr() + " " + value->toDebug();
     }
 };
 
@@ -211,4 +231,33 @@ public:
         }
     }
 };
+
+class CheckVarTypeMixed {
+private:
+public:
+    CheckVarTypeMixed() {}
+
+    void check(Node *noh) {
+        for(Node *c : noh->getChildren()) {
+            check(c);
+        }
+
+        BinaryOp *bo = dynamic_cast<BinaryOp*>(noh);
+        if (bo) {
+            Integer *i0 = dynamic_cast<Integer*>(noh->getChildren()[0]);
+            Integer *i1 = dynamic_cast<Integer*>(noh->getChildren()[1]);
+            if ((i0 == NULL && i1 != NULL) ||
+                (i0 != NULL && i1 == NULL)) {
+                cout << build_file_name
+                     << ":"
+                     << bo->getLineNo()
+                     << ":0: semantic error: " 
+                     << " tipo de dados mescaldo proibido."
+                     << endl;
+                errorcount++;
+            }
+        }
+    }
+};
+
 
