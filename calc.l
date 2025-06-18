@@ -14,14 +14,26 @@ int yyerror(const char *s);
 
 %option yylineno
 
+%x COMMENT
+
 %%
 
 [ \t\r\n] { /* ignora */ }
+"/*"					{ yymore(); BEGIN COMMENT; }
+<COMMENT>[^*]			{ yymore(); }
+<COMMENT>"*"/[^/]		{ yymore(); }
+<COMMENT>"*/"			{ BEGIN(INITIAL); }
 
 "//".*\n { /* ignora */ }
 
+"#include".* { /* ignora */ }
+
+"static" { /* ignore */ }
+"volatile" { /* ignore */ }
 "print" { return TOK_PRINT; }
 
+">=" { return TOK_LARGE_EQUAL; }
+"<=" { return TOK_LESS_EQUAL; }
 "+" { return '+'; }
 "-" { return '-'; }
 "*" { return '*'; }
@@ -30,6 +42,19 @@ int yyerror(const char *s);
 ")" { return ')'; }
 ";" { return ';'; }
 "=" { return '='; }
+"[" { return '['; }
+"]" { return ']'; }
+"{" { return '{'; }
+"}" { return '}'; }
+">" { return '>'; }
+"<" { return '<'; }
+"," { return ','; }
+"&" { return '&'; }
+"|" { return '|'; }
+"\"" { return '\"'; }
+"'" { return '\''; }
+"%" { return '%'; }
+"^" { return '^'; }
 
 [a-zA-Z_][a-zA-Z0-9_]* {
     yylval.str = strndup(yytext, yyleng);
@@ -41,9 +66,16 @@ int yyerror(const char *s);
     return TOK_FLOAT;
 }
 
-[0-9]+ {
+[0-9]+U*L* {
     yylval.itg = atoi(yytext);
     return TOK_INT;
+}
+
+"0x"[0-9a-fA-F]+U*L* {
+    char *aux = strndup(yytext, yyleng);
+	yylval.itg = strtoull(aux, NULL, 16);
+	free(aux);
+	return TOK_INT;
 }
 
 . { 
@@ -89,7 +121,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    yydebug = 1;
+    //yydebug = 1;
     yyparse();
 
     if (yyin)

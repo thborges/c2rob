@@ -89,12 +89,27 @@ public:
 class Variable : public Node {
 protected:
     string name;
-    Node *value;
+    string type;
+    Node *value = nullptr;
+    Node *idx = nullptr;
 public:
-    Variable(const string n, Node *v) {
+    Variable(const string t, const string n, Node *v) {
         name = n;
+        type = t;
         value = v;
         children.push_back(v);
+    }
+
+    Variable(const string t, const string n) {
+        name = n;
+        type = t;
+    }
+
+    Variable(const string t, const string n, Node *i, Node *v) {
+        name = n;
+        type = t;
+        value = v;
+        idx = i;
     }
 
     const string getName() {
@@ -107,6 +122,42 @@ public:
 
     virtual string toDebug() override {
         return name + "=" + value->toDebug();
+    }
+};
+
+class Function : public Node {
+protected:
+    string name;
+    string type;
+    Node *args = nullptr;
+    Node *commands = nullptr;
+public:
+    Function(const string t, const string n, Node *a) {
+        name = n;
+        type = t;
+        args = a;
+        children.push_back(a);
+    }
+
+    Function(const string t, const string n, Node *a, Node *c) {
+        name = n;
+        type = t;
+        args = a;
+        commands = c;
+        children.push_back(a);
+        children.push_back(c);
+    }
+
+    const string getName() {
+        return name;
+    }
+
+    virtual string toStr() override {
+        return name + "=";
+    }
+
+    virtual string toDebug() override {
+        return name + "=" + args->toDebug();
     }
 };
 

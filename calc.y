@@ -13,7 +13,7 @@ extern bool force_print_tree;
 
 %union {
     char *str;
-    int itg;
+    int64_t itg;
     double flt;
     Node *node;
 }
@@ -23,13 +23,18 @@ extern bool force_print_tree;
 %token TOK_FLOAT
 %token TOK_INT
 
+%token TOK_LARGE_EQUAL
+%token TOK_LESS_EQUAL
+
 %type<str> TOK_IDENT
 %type<itg> TOK_INT
 %type<flt> TOK_FLOAT
-%type<node> globals global expr term factor unary
+%type<node> globals global expr term factor unary array_decl 
+%type<node> array_values array_value
+%type<node> locals local scalar scalar_init array
 
 %printer { fprintf(yyo, "%s", $$); } <str>
-%printer { fprintf(yyo, "%d", $$); } <itg>
+%printer { fprintf(yyo, "%lld", $$); } <itg>
 %printer { fprintf(yyo, "%lf", $$); } <flt>
 
 %printer { fprintf(yyo, "%s",
@@ -67,16 +72,68 @@ globals : global {
     $$ = n;
 }
 
-global : TOK_IDENT '=' expr ';' {
-    $$ = new Variable($TOK_IDENT, $expr);
+global : scalar
+       | scalar_init
+       | array
+       ;
+
+/* function decl */
+global : TOK_IDENT[type] TOK_IDENT[name] '(' TOK_IDENT[void] ')' ';' {
+    $$ = new Function($type, $name, nullptr);
 }
 
-global : TOK_PRINT TOK_IDENT ';' {
-    Ident *id = new Ident($TOK_IDENT);
-    $$ = new Print(id);
+/* function impl */
+global : TOK_IDENT[type] TOK_IDENT[name] '(' TOK_IDENT[void] ')' '{' locals '}' {
+    $$ = new Function($type, $name, nullptr, $locals);
 }
 
 global : error ';' { $$ = new Node(); }
+
+locals : locals[gg] local {
+    $gg->append($local);
+    $$ = $gg;
+}
+
+locals : local {
+    Node *n = new Node();
+    n->append($local);
+    $$ = n;
+}
+
+local : scalar
+      | scalar_init
+      | array
+      ; 
+
+/* scalars */
+scalar_init : TOK_IDENT[type] TOK_IDENT[name] '=' expr ';' {
+    $$ = new Variable($type, $name, $expr);
+}
+
+/* not initialized scalars */
+scalar : TOK_IDENT[type] TOK_IDENT[name] ';' {
+    $$ = new Variable($type, $name);
+}
+
+/* arrays */
+array : TOK_IDENT[type] TOK_IDENT[name] '[' expr[idx] ']' '=' array_decl[value] ';' {
+    $$ = new Variable($type, $name, $idx, $value);
+}
+
+array_decl : '{' array_values '}' { $$ = $array_values; } ;
+
+array_values : array_values[gg] ',' array_value {
+    $gg->append($array_value);
+    $$ = $gg;
+}
+
+array_values : array_value {
+    Node *n = new Node();
+    n->append($array_value);
+    $$ = n;
+}
+
+array_value : factor ;
 
 expr : expr[ee] '+' term {
     $$ = new BinaryOp($ee, $term, '+');
