@@ -1,0 +1,570 @@
+/* 
+ * Declaration of csmith runtime functions
+ */
+
+const sizeof_int8 = 1;
+const sizeof_uint8 = 1;
+const sizeof_int16 = 2;
+const sizeof_uint16 = 2;
+const sizeof_int32 = 4;
+const sizeof_uint32 = 4;
+const sizeof_int64 = 8;
+const sizeof_uint64 = 8;
+
+const uint8_max  = 255u;
+const uint16_max = 65535u;
+const uint32_max = 4294967295u;
+const uint64_max = 18446744073709551615u;
+
+const int8_min  = -128;
+const int8_max  =  127;
+const int16_min = -32768;
+const int16_max =  32767;
+const int32_min = -2147483648;
+const int32_max =  2147483647;
+const int64_min = -9223372036854775808;
+const int64_max =  9223372036854775807;
+
+crc32_context = uint64(0);
+
+int16 strcmp(char[] s1, char[] s2);
+void platform_main_begin();
+void crc32_gentab();
+void platform_main_end(uint64 x, int32 flag);
+
+
+/*
+ * INT8
+ */
+
+int8 safe_unary_minus_func_int8_t_s(int8 si) inline {
+    if (si == -128) {
+        return si;
+    }
+    return -si;
+}
+
+int8 safe_add_func_int8_t_s_s(int8 si1, int8 si2) inline {
+    if ((si1 > 0 and si2 > 0 and si1 > (127 - si2)) or
+        (si1 < 0 and si2 < 0 and si1 < (-128 - si2))) {
+        return si1;
+    }
+    return si1 + si2;
+}
+
+int8 safe_sub_func_int8_t_s_s(int8 si1, int8 si2) inline {
+    diff = si1 - si2;
+    xor1 = si1 ^ si2;
+    xor2 = (si1 ^ ((xor1 & (1 << (sizeof_int8 * 8 - 1))) - si2)) ^ si2;
+    if ((xor1 & xor2) < 0) {
+        return si1;
+    }
+    return diff;
+}
+
+int8 safe_mul_func_int8_t_s_s(int8 si1, int8 si2) inline {
+    if ((si1 > 0 and si2 > 0 and si1 > (127 / si2)) or
+        (si1 > 0 and si2 <= 0 and si2 < (-128 / si1)) or
+        (si1 <= 0 and si2 > 0 and si1 < (-128 / si2)) or
+        (si1 <= 0 and si2 <= 0 and si1 != 0 and si2 < (127 / si1))) {
+        return si1;
+    }
+    return si1 * si2;
+}
+
+int8 safe_mod_func_int8_t_s_s(int8 si1, int8 si2) inline {
+    if (si2 == 0 or (si1 == -128 and si2 == -1)) {
+        return si1;
+    }
+    return si1 % si2;
+}
+
+int8 safe_div_func_int8_t_s_s(int8 si1, int8 si2) inline {
+    if (si2 == 0 or (si1 == -128 and si2 == -1)) {
+        return si1;
+    }
+    return si1 / si2;
+}
+
+int8 safe_lshift_func_int8_t_s_s(int8 left, int32 right) inline {
+    if (left < 0 or right < 0 or right >= 8 or left > (127 >> right)) {
+        return left;
+    }
+    return left << right;
+}
+
+int8 safe_lshift_func_int8_t_s_u(int8 left, uint32 right) inline {
+    if (left < 0 or right >= 8 or left > (127 >> right)) {
+        return left;
+    }
+    return left << right;
+}
+
+int8 safe_rshift_func_int8_t_s_s(int8 left, int32 right) inline {
+    if (left < 0 or right < 0 or right >= 8) {
+        return left;
+    }
+    return left >> right;
+}
+
+int8 safe_rshift_func_int8_t_s_u(int8 left, uint32 right) inline {
+    if (left < 0 or right >= 8) {
+        return left;
+    }
+    return left >> right;
+}
+
+/*
+ * INT16
+ */
+
+int16 safe_unary_minus_func_int16_t_s(int16 si) inline {
+    if (si == int16_min) {
+        return si;
+    }
+    return -si;
+}
+
+int16 safe_add_func_int16_t_s_s(int16 si1, int16 si2) inline {
+    if ((si1 > 0 and si2 > 0 and si1 > (int16_max - si2)) or
+        (si1 < 0 and si2 < 0 and si1 < (int16_min - si2))) {
+        return si1;
+    }
+    return si1 + si2;
+}
+
+int16 safe_sub_func_int16_t_s_s(int16 si1, int16 si2) inline {
+    if ((((si1 ^ si2) & (((si1 ^ (((si1 ^ si2) & (1 << (sizeof_int16*8 - 1)))) - si2)) ^ si2))) < 0) {
+        return si1;
+    }
+    return si1 - si2;
+}
+
+int16 safe_mul_func_int16_t_s_s(int16 si1, int16 si2) inline {
+    if (((si1 > 0 and si2 > 0 and si1 > (int16_max / si2)) or
+         (si1 > 0 and si2 <= 0 and si2 < (int16_min / si1)) or
+         (si1 <= 0 and si2 > 0 and si1 < (int16_min / si2)) or
+         (si1 <= 0 and si2 <= 0 and si1 != 0 and si2 < (int16_max / si1)))) {
+        return si1;
+    }
+    return si1 * si2;
+}
+
+int16 safe_mod_func_int16_t_s_s(int16 si1, int16 si2) inline {
+    if ((si2 == 0) or (si1 == int16_min and si2 == -1)) {
+        return si1;
+    }
+    return si1 % si2;
+}
+
+int16 safe_div_func_int16_t_s_s(int16 si1, int16 si2) inline {
+    if ((si2 == 0) or (si1 == int16_min and si2 == -1)) {
+        return si1;
+    }
+    return si1 / si2;
+}
+
+int16 safe_lshift_func_int16_t_s_s(int16 left, int32 right) inline {
+    if ((left < 0) or (right < 0) or (right >= sizeof_int16*8) or (left > (int16_max >> right))) {
+        return left;
+    }
+    return left << right;
+}
+
+int16 safe_lshift_func_int16_t_s_u(int16 left, uint32 right) inline {
+    if ((left < 0) or (right >= sizeof_int16*8) or (left > (int16_max >> right))) {
+        return left;
+    }
+    return left << right;
+}
+
+int16 safe_rshift_func_int16_t_s_s(int16 left, int32 right) inline {
+    if ((left < 0) or (right < 0) or (right >= sizeof_int16*8)) {
+        return left;
+    }
+    return left >> right;
+}
+
+int16 safe_rshift_func_int16_t_s_u(int16 left, uint32 right) inline {
+    if ((left < 0) or (right >= sizeof_int16*8)) {
+        return left;
+    }
+    return left >> right;
+}
+
+/*
+ * INT32
+ */
+
+int32 safe_unary_minus_func_int32_t_s(int32 si) inline {
+    if (si == int32_min) {
+        return si;
+    }
+    return -si;
+}
+
+int32 safe_add_func_int32_t_s_s(int32 si1, int32 si2) inline {
+    if (((si1 > 0) and (si2 > 0) and (si1 > (int32_max - si2))) or
+        ((si1 < 0) and (si2 < 0) and (si1 < (int32_min - si2)))) {
+        return si1;
+    }
+    return si1 + si2;
+}
+
+int32 safe_sub_func_int32_t_s_s(int32 si1, int32 si2) inline {
+    if ((((si1 ^ si2) & (((si1 ^ ((si1 ^ si2) & (1 << (sizeof_int32*8 - 1)))) - si2) ^ si2))) < 0) {
+        return si1;
+    }
+    return si1 - si2;
+}
+
+int32 safe_mul_func_int32_t_s_s(int32 si1, int32 si2) inline {
+    if (((si1 > 0) and (si2 > 0) and (si1 > (int32_max / si2))) or
+        ((si1 > 0) and (si2 <= 0) and (si2 < (int32_min / si1))) or
+        ((si1 <= 0) and (si2 > 0) and (si1 < (int32_min / si2))) or
+        ((si1 <= 0) and (si2 <= 0) and (si1 != 0) and (si2 < (int32_max / si1)))) {
+        return si1;
+    }
+    return si1 * si2;
+}
+
+int32 safe_mod_func_int32_t_s_s(int32 si1, int32 si2) inline {
+    if ((si2 == 0) or (si1 == int32_min and si2 == -1)) {
+        return si1;
+    }
+    return si1 % si2;
+}
+
+int32 safe_div_func_int32_t_s_s(int32 si1, int32 si2) inline {
+    if ((si2 == 0) or (si1 == int32_min and si2 == -1)) {
+        return si1;
+    }
+    return si1 / si2;
+}
+
+int32 safe_lshift_func_int32_t_s_s(int32 left, int32 right) inline {
+    if ((left < 0) or (right < 0) or (right >= sizeof_int32*8) or (left > (int32_max >> right))) {
+        return left;
+    }
+    return left << right;
+}
+
+int32 safe_lshift_func_int32_t_s_u(int32 left, uint32 right) inline {
+    if ((left < 0) or (right >= sizeof_int32*8) or (left > (int32_max >> right))) {
+        return left;
+    }
+    return left << right;
+}
+
+int32 safe_rshift_func_int32_t_s_s(int32 left, int32 right) inline {
+    if ((left < 0) or (right < 0) or (right >= sizeof_int32*8)) {
+        return left;
+    }
+    return left >> right;
+}
+
+int32 safe_rshift_func_int32_t_s_u(int32 left, uint32 right) inline {
+    if ((left < 0) or (right >= sizeof_int32*8)) {
+        return left;
+    }
+    return left >> right;
+}
+
+/*
+ * INT64
+ */
+
+int64 safe_unary_minus_func_int64_t_s(int64 si) inline {
+    if (si == int64_min) {
+        return si;
+    }
+    return -si;
+}
+
+int64 safe_add_func_int64_t_s_s(int64 si1, int64 si2) inline {
+    if (((si1 > 0) and (si2 > 0) and (si1 > int64_max - si2)) or
+        ((si1 < 0) and (si2 < 0) and (si1 < int64_min - si2))) {
+        return si1;
+    }
+    return si1 + si2;
+}
+
+int64 safe_sub_func_int64_t_s_s(int64 si1, int64 si2) inline {
+    xor = si1 ^ si2;
+    left_shifted = ((si1 ^ (xor & (int64(1) << (sizeof_int64*8 - 1)))) - si2) ^ si2;
+    if ((xor & left_shifted) < 0) {
+        return si1;
+    }
+    return si1 - si2;
+}
+
+int64 safe_mul_func_int64_t_s_s(int64 si1, int64 si2) inline {
+    if (((si1 > 0) and (si2 > 0) and (si1 > int64_max / si2)) or
+        ((si1 > 0) and (si2 <= 0) and (si2 < int64_min / si1)) or
+        ((si1 <= 0) and (si2 > 0) and (si1 < int64_min / si2)) or
+        ((si1 <= 0) and (si2 <= 0) and (si1 != 0) and (si2 < int64_max / si1))) {
+        return si1;
+    }
+    return si1 * si2;
+}
+
+int64 safe_mod_func_int64_t_s_s(int64 si1, int64 si2) inline {
+    if ((si2 == 0) or (si1 == int64_min and si2 == -1)) {
+        return si1;
+    }
+    return si1 % si2;
+}
+
+int64 safe_div_func_int64_t_s_s(int64 si1, int64 si2) inline {
+    if ((si2 == 0) or (si1 == int64_min and si2 == -1)) {
+        return si1;
+    }
+    return si1 / si2;
+}
+
+int64 safe_lshift_func_int64_t_s_s(int64 left, int32 right) inline {
+    if ((left < 0) or (right < 0) or (right >= (sizeof_int64*8)) or (left > (int64_max >> right))) {
+        return left;
+    }
+    return left << right;
+}
+
+int64 safe_lshift_func_int64_t_s_u(int64 left, uint32 right) inline {
+    if ((left < 0) or (right >= (sizeof_int64*8)) or (left > (int64_max >> right))) {
+        return left;
+    }
+    return left << right;
+}
+
+int64 safe_rshift_func_int64_t_s_s(int64 left, int32 right) inline {
+    if ((left < 0) or (right < 0) or (right >= (sizeof_int64*8))) {
+        return left;
+    }
+    return left >> right;
+}
+
+int64 safe_rshift_func_int64_t_s_u(int64 left, uint32 right) inline {
+    if ((left < 0) or (right >= (sizeof_int64*8))) {
+        return left;
+    }
+    return left >> right;
+}
+
+
+/*
+ * UINT8
+ */
+
+uint8 safe_unary_minus_func_uint8_t_u(uint8 ui) inline {
+  return -ui;
+}
+
+uint8 safe_add_func_uint8_t_u_u(uint8 ui1, uint8 ui2) inline {
+  return ui1 + ui2;
+}
+
+uint8 safe_sub_func_uint8_t_u_u(uint8 ui1, uint8 ui2) inline {
+  return ui1 - ui2;
+}
+
+uint8 safe_mul_func_uint8_t_u_u(uint8 ui1, uint8 ui2) inline {
+  return uint8(uint32(ui1) * uint32(ui2));
+}
+
+uint8 safe_mod_func_uint8_t_u_u(uint8 ui1, uint8 ui2) inline {
+  if (ui2 == 0) { return ui1; }
+  return ui1 % ui2;
+}
+
+uint8 safe_mod_func_uint8_t_u_u(uint8 ui1, uint8 ui2) inline {
+  if (ui2 == 0) { return ui1; }
+  return ui1 % ui2;
+}
+
+uint8 safe_div_func_uint8_t_u_u(uint8 ui1, uint8 ui2) inline {
+  if (ui2 == 0) { return ui1; }
+  return ui1 / ui2;
+}
+
+uint8 safe_lshift_func_uint8_t_u_s(uint8 left, int32 right) inline {
+  if (right < 0 or right >= sizeof_uint8 * 8 or left > (uint8_max >> right)) { return left; }
+  return left << right;
+}
+
+uint8 safe_lshift_func_uint8_t_u_u(uint8 left, uint32 right) inline {
+  if (right >= sizeof_uint8 * 8 or left > (uint8_max >> right)) { return left; }
+  return left << right;
+}
+
+
+uint8 safe_rshift_func_uint8_t_u_s(uint8 left, int32 right) inline {
+  if (right < 0 or right >= sizeof_uint8 * 8) { return left; }
+  return left >> right;
+}
+
+uint8 safe_rshift_func_uint8_t_u_u(uint8 left, uint32 right) inline {
+  if (right >= sizeof_uint8 * 8) { return left; }
+  return left >> right;
+}
+
+/*
+ * UINT16
+ */
+
+uint16 safe_unary_minus_func_uint16_t_u(uint16 ui) inline {
+  return -ui;
+}
+
+uint16 safe_add_func_uint16_t_u_u(uint16 ui1, uint16 ui2) inline {
+  return ui1 + ui2;
+}
+
+uint16 safe_sub_func_uint16_t_u_u(uint16 ui1, uint16 ui2) inline {
+  return ui1 - ui2;
+}
+
+uint16 safe_mul_func_uint16_t_u_u(uint16 ui1, uint16 ui2) inline {
+  return uint16(uint32(ui1) * uint32(ui2));
+}
+
+uint16 safe_mod_func_uint16_t_u_u(uint16 ui1, uint16 ui2) inline {
+  if (ui2 == 0) { return ui1; }
+  return ui1 % ui2;
+}
+
+uint16 safe_div_func_uint16_t_u_u(uint16 ui1, uint16 ui2) inline {
+  if (ui2 == 0) { return ui1; }
+  return ui1 / ui2;
+}
+
+uint16 safe_lshift_func_uint16_t_u_s(uint16 left, int32 right) inline {
+  if (right < 0 or right >= sizeof_uint16 * 8 or left > (uint16_max >> right)) { return left; }
+  return left << right;
+}
+
+uint16 safe_lshift_func_uint16_t_u_u(uint16 left, uint32 right) inline {
+  if (right >= sizeof_uint16 * 8 or left > (uint16_max >> right)) { return left; }
+  return left << right;
+}
+
+uint16 safe_rshift_func_uint16_t_u_s(uint16 left, int32 right) inline {
+  if (right < 0 or right >= sizeof_uint16 * 8) { return left; }
+  return left >> right;
+}
+
+uint16 safe_rshift_func_uint16_t_u_u(uint16 left, uint32 right) inline {
+  if (right >= sizeof_uint16 * 8) { return left; }
+  return left >> right;
+}
+
+
+/*
+ * UINT32
+ */
+
+uint32 safe_unary_minus_func_uint32_t_u(uint32 ui) inline {
+  return -ui;
+}
+
+uint32 safe_add_func_uint32_t_u_u(uint32 ui1, uint32 ui2) inline {
+  return ui1 + ui2;
+}
+
+uint32 safe_sub_func_uint32_t_u_u(uint32 ui1, uint32 ui2) inline {
+  return ui1 - ui2;
+}
+
+uint32 safe_mul_func_uint32_t_u_u(uint32 ui1, uint32 ui2) inline {
+  return ui1 * ui2;
+}
+
+uint32 safe_mod_func_uint32_t_u_u(uint32 ui1, uint32 ui2) inline {
+  if (ui2 == 0) { return ui1; }
+  return ui1 % ui2;
+}
+
+uint32 safe_div_func_uint32_t_u_u(uint32 ui1, uint32 ui2) inline {
+  if (ui2 == 0) { return ui1; }
+  return ui1 / ui2;
+}
+
+uint32 safe_lshift_func_uint32_t_u_s(uint32 left, int32 right) inline {
+  if (right < 0 or right >= sizeof_uint32 * 8 or left > (uint32_max >> right)) { return left; }
+  return left << right;
+}
+
+uint32 safe_lshift_func_uint32_t_u_u(uint32 left, uint32 right) inline {
+  if (right >= sizeof_uint32 * 8 or left > (uint32_max >> right)) { return left; }
+  return left << right;
+}
+
+uint32 safe_rshift_func_uint32_t_u_s(uint32 left, int32 right) inline {
+  if (right < 0 or right >= sizeof_uint32 * 8) { return left; }
+  return left >> right;
+}
+
+uint32 safe_rshift_func_uint32_t_u_u(uint32 left, uint32 right) inline {
+  if (right >= sizeof_uint32 * 8) { return left; }
+  return left >> right;
+}
+
+
+/*
+ * UINT64
+ */
+
+uint64 safe_unary_minus_func_uint64_t_u(uint64 ui) inline {
+  return -ui;
+}
+
+uint64 safe_add_func_uint64_t_u_u(uint64 ui1, uint64 ui2) inline {
+  return ui1 + ui2;
+}
+
+uint64 safe_sub_func_uint64_t_u_u(uint64 ui1, uint64 ui2) inline {
+  return ui1 - ui2;
+}
+
+uint64 safe_mul_func_uint64_t_u_u(uint64 ui1, uint64 ui2) inline {
+  return ui1 * ui2;
+}
+
+uint64 safe_mod_func_uint64_t_u_u(uint64 ui1, uint64 ui2) inline {
+  if (ui2 == 0) { return ui1; }
+  return ui1 % ui2;
+}
+
+uint64 safe_div_func_uint64_t_u_u(uint64 ui1, uint64 ui2) inline {
+  if (ui2 == 0) { return ui1; }
+  return ui1 / ui2;
+}
+
+uint64 safe_lshift_func_uint64_t_u_s(uint64 left, int32 right) inline {
+  if (right < 0 or right >= sizeof_uint64 * 8 or left > (uint64_max >> right)) {
+    return left;
+  }
+  return left << right;
+}
+
+uint64 safe_lshift_func_uint64_t_u_u(uint64 left, uint32 right) inline {
+  if (right >= sizeof_uint64 * 8 or left > (uint64_max >> right)) {
+    return left;
+  }
+  return left << right;
+}
+
+uint64 safe_rshift_func_uint64_t_u_s(uint64 left, int32 right) inline {
+  if (right < 0 or right >= sizeof_uint64 * 8) {
+    return left;
+  }
+  return left >> right;
+}
+
+uint64 safe_rshift_func_uint64_t_u_u(uint64 left, uint32 right) inline {
+  if (right >= sizeof_uint64 * 8) {
+    return left;
+  }
+  return left >> right;
+}
+
+
