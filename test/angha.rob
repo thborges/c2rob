@@ -1,0 +1,11 @@
+use base;
+
+const false = 0;
+const true = 1;
+const NULL = 0;
+
+type size_t = uint32;
+type intptr_t = int32;
+type uintptr_t = uint32;
+type scalar_t__ = int32;
+type bool = int16;

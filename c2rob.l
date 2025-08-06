@@ -45,6 +45,7 @@ int yycolno = 0;
 "static"    { return TOK_STATIC; }
 "volatile"  { return TOK_VOLATILE; }
 "const"     { return TOK_CONST; }
+"typedef"     { return TOK_TYPEDEF; }
 
 ">"  { yylval.str = ">";  return TOK_CMP_RELAT; }
 "<"  { yylval.str = "<";  return TOK_CMP_RELAT; }

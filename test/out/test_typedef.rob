@@ -1,0 +1,6 @@
+x = myint(42);
+
+int32 main() {
+	return x;
+}
+

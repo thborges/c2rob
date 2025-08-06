@@ -1,6 +1,7 @@
 SFILES = $(patsubst cfiles/%.c,out/%.s,$(wildcard cfiles/*.c))
 ARCH = atmega328p
 DUMP = avr-objdump
+ROBCMP = /home/alisson/Documentos/c2rob/robcmp/build/robcmp
 
 .SUFFIXES:
 
@@ -18,7 +19,7 @@ out/%.rob : cfiles/%.c | ../c2rob
 	../c2rob $< > $@
 
 out/%.o : out/%.rob
-	robcmp -I .. -bdep -a ${ARCH} $< -o $@
+	$(ROBCMP) -I .. -bdep -a ${ARCH} $< -o $@
 
 out/%.s : out/%.o
 	${DUMP} -D $< > $@

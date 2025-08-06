@@ -1,7 +1,7 @@
 for ((i = 1; i <= $1; i++)); do
     printf -v padded "%05d" "$i"
     echo "cfiles/$padded.c"
-    ./csmith \
+    /home/alisson/csmith/build/src/csmith \
         -o cfiles/$padded.c\
         -s $padded\
         --probability-configuration csmith.prob\

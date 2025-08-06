@@ -26,12 +26,13 @@ extern bool force_print_tree;
 %token TOK_IF TOK_ELSE TOK_FOR TOK_RETURN
 %token TOK_INCLUDE TOK_STRUCT
 %token TOK_STATIC TOK_VOLATILE TOK_CONST
+%token TOK_TYPEDEF
 
 %type<str> TOK_STRING TOK_IDENT TOK_CMP_EQNEQ TOK_CMP_RELAT TOK_UNARY_OPERATOR TOK_ATTRIBUTION
 %type<str> TOK_INCLUDE
 %type<itg> TOK_INT
 %type<flt> TOK_FLOAT
-%type<node> globals global expr factor array_decl array_init_decl
+%type<node> globals global typedef_decl expr factor array_decl array_init_decl
 %type<node> array_values array_values_decls array_values_decl struct_values_decl
 %type<node> locals local scalar_decl scalar_init_decl attribution
 %type<node> scalar_or_array
@@ -95,8 +96,19 @@ global : qualifiers scalar_decl ';'         { $$ = $2; }
        | func_impl
        | include
        | struct_decl
+       | typedef_decl                        
        ;
-
+typedef_decl
+    : TOK_TYPEDEF TOK_IDENT TOK_IDENT ';' {
+        $$ = new Node(); /* ignore alias */
+      }
+    | TOK_TYPEDEF TOK_IDENT TOK_IDENT TOK_IDENT ';' {
+        $$ = new Node(); /* ignore alias */
+      }
+    | TOK_TYPEDEF error ';' {
+        $$ = new Node(); yyerrok; /* recover */
+      }
+    ;
 qualifiers : qualifiers[gg] qualifier {
     $gg->append($qualifier);
     $$ = $gg;
@@ -398,6 +410,5 @@ func_call_args : expr {
 }
 
 %%
-
 
 
