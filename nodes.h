@@ -14,6 +14,36 @@ using namespace std;
 
 class Type;
 map<string, Type*> declared_types;
+map<string, string> declared_typedefs;
+
+string get_final_type_for(string type) {
+    auto it = declared_types.find(type);
+    if (it != declared_types.end()) {
+        return type;
+    } else if (declared_typedefs.contains(type))
+        return get_final_type_for(declared_typedefs[type]);
+    else
+        return type;
+}
+
+class Strings {
+public:
+    vector<string> strings;
+    
+    string getName() {
+        return strings.back();
+    }
+
+    string getType() {
+        string result;
+        for (size_t i = 0; i + 1 < strings.size(); ++i) {
+            if (!result.empty())
+                result += " ";
+            result += strings[i];
+        }
+        return result;
+    }
+};
 
 class Node {
 protected:
@@ -216,6 +246,21 @@ public:
     }
 };
 
+class LoadField : public Node {
+protected:
+    string name, field;
+public:
+    LoadField(const string _name, const string _field) {
+        name = _name;
+        field = _field;
+    }
+
+    virtual string toStr(int il) override {
+        string result = identation(il) + name + "." + field;
+        return result;
+    }
+};
+
 class VariableDecl : public Node {
 protected:
     string name;
@@ -258,19 +303,31 @@ public:
     }
 
     static string convertTypeToRob(string type) {
+        std::regex pointertypes("[a-z0-9]+ ?\\*");
+        if (regex_match(type, pointertypes)) {
+            string tt = convertTypeToRob(type.substr(0, type.length()-1));
+            return tt + "[]";
+        }
+
+        type = get_final_type_for(type);
+
         std::regex inttypes("u?int[0-9]+_t");
         if (regex_match(type, inttypes))
             return type.substr(0, type.length()-2);
         
-        std::regex pointertypes("[a-z0-9]+ ?\\*");
-        if (regex_match(type, pointertypes))
-            return type.substr(0, type.length()-1) + "[]";
-
         if (type == "int" || type == "signed")
             return "int32";
 
+        if (type == "unsigned long") return "uint32";
+
         if (type == "long")
             return "int64";
+
+        // angha bench scalar types
+        if (type == "intptr_t") return "int32";
+        if (type == "uintptr_t") return "uint32";
+        if (type == "scalar_t__") return "int32";
+        if (type == "size_t") return "uint32";
 
         if (type == "unsigned")
             return "uint32";
@@ -407,7 +464,7 @@ public:
 
     virtual string toStr(int il) override {
         string result = "\ntype ";
-        result += name + "{\n";
+        result += name + " {\n";
         result += fields->toStr(il+1);
         result += "}\n\n";
         return result;

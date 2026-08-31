@@ -5,6 +5,7 @@
 int yyerror(const char *s);
 int yylex(void);
 int errorcount = 0;
+int current_unamed_arg = 0;
 extern bool force_print_tree;
 %}
 
@@ -17,6 +18,7 @@ extern bool force_print_tree;
     int64_t itg;
     double flt;
     Node *node;
+    Strings *strings;
 }
 
 %token TOK_IDENT TOK_ATTRIBUTION
@@ -24,7 +26,7 @@ extern bool force_print_tree;
 %token TOK_OR TOK_AND TOK_CHAR
 %token TOK_CMP_EQNEQ TOK_CMP_RELAT TOK_UNARY_OPERATOR TOK_STRING
 %token TOK_IF TOK_ELSE TOK_FOR TOK_RETURN
-%token TOK_INCLUDE TOK_STRUCT
+%token TOK_INCLUDE TOK_STRUCT TOK_TYPEDEF
 %token TOK_STATIC TOK_VOLATILE TOK_CONST
 
 %type<str> TOK_STRING TOK_IDENT TOK_CMP_EQNEQ TOK_CMP_RELAT TOK_UNARY_OPERATOR TOK_ATTRIBUTION
@@ -34,11 +36,13 @@ extern bool force_print_tree;
 %type<node> globals global expr factor array_decl array_init_decl
 %type<node> array_values array_values_decls array_values_decl struct_values_decl
 %type<node> locals local scalar_decl scalar_init_decl attribution
-%type<node> scalar_or_array
+%type<node> scalar_or_array typedef_decl
 %type<node> func_arg func_args func_decl func_impl function_call func_call_args
 %type<node> ifstmt elseblock forstmt returnstmt include
 %type<node> struct_decl struct_field struct_fields
 %type<node> qualifiers qualifier
+%type<itg> pointer_arg
+%type<strings> typedef_names
 
 %printer { fprintf(yyo, "%s", $$); } <str>
 %printer { fprintf(yyo, "%lld", $$); } <itg>
@@ -71,13 +75,15 @@ program : globals {
 }
 
 globals : globals[gg] global {
-    $gg->append($global);
+    if ($global)
+        $gg->append($global);
     $$ = $gg;
 }
 
 globals : global {
     Node *n = new Node();
-    n->append($global);
+    if ($global)
+        n->append($global);
     $$ = n;
 }
 
@@ -86,15 +92,16 @@ global : qualifiers scalar_decl ';'         { $$ = $2; }
        | qualifiers array_init_decl ';'     { $$ = $2; }
        | qualifiers array_decl ';'          { $$ = $2; }
        | qualifiers func_decl ';'           { $$ = $2; }
+       | qualifiers struct_decl ';'         { $$ = $2; }
        | qualifiers func_impl               { $$ = $2; }
        | scalar_decl ';'
        | scalar_init_decl ';'
        | array_init_decl ';'
        | array_decl ';'
        | func_decl ';'
+       | typedef_decl ';'
        | func_impl
        | include
-       | struct_decl
        ;
 
 qualifiers : qualifiers[gg] qualifier {
@@ -121,7 +128,27 @@ include : TOK_INCLUDE[name] {
     $$ = new Ident("use " + name + ";\n");
 }
 
-struct_decl : TOK_STRUCT TOK_IDENT[name] '{' struct_fields '}' ';' {
+typedef_decl : TOK_TYPEDEF typedef_names[src] {
+    declared_typedefs[$src->getName()] = $src->getType();
+    $$ = NULL;
+}
+
+typedef_decl : TOK_TYPEDEF TOK_STRUCT typedef_names[src] {
+    declared_typedefs[$src->getName()] = $src->getType();
+    $$ = NULL;
+}
+
+typedef_names : typedef_names[ss] TOK_IDENT[id] {
+    $ss->strings.push_back($id);
+    $$ = $ss;
+}
+
+typedef_names : TOK_IDENT[id] {
+    $$ = new Strings();
+    $$->strings.push_back($id);
+}
+
+struct_decl : TOK_IDENT[name] '{' struct_fields '}' {
     $$ = new Type($name, $struct_fields);
 }
 
@@ -152,7 +179,15 @@ func_decl : TOK_IDENT[type] TOK_IDENT[name] '(' func_args ')' {
     $$ = new Function($type, $name, $func_args);
 }
 
+func_decl : TOK_IDENT[type] '*' TOK_IDENT[name] '(' func_args ')' {
+    $$ = new Function($type, $name, $func_args);
+}
+
 func_impl : TOK_IDENT[type] TOK_IDENT[name] '(' func_args ')' '{' locals '}' {
+    $$ = new Function($type, $name, $func_args, $locals);
+}
+
+func_impl : TOK_IDENT[type] '*' TOK_IDENT[name] '(' func_args ')' '{' locals '}' {
     $$ = new Function($type, $name, $func_args, $locals);
 }
 
@@ -167,10 +202,46 @@ func_args : func_arg {
     $$ = n;
 }
 
-// void func(void)
-func_args : TOK_IDENT[type] {
-    $$ = new Ident(""); // unamed parameter is not used, ignore them
+pointer_arg : '*' {
+    $$ = 1;
 }
+
+pointer_arg : '*' '*' {
+    $$ = 1;
+}
+
+// unamed parameters
+func_arg : TOK_IDENT[type] {
+    char unamed[10];
+    snprintf(unamed, 10, "_un%d", current_unamed_arg++);
+    $$ = new FuncArg($type, unamed);
+}
+
+func_arg : TOK_IDENT[type] pointer_arg {
+    char unamed[10];
+    snprintf(unamed, 10, "_un%d", current_unamed_arg++);
+    string atype = $type;
+    if ((atype == "char" || atype == "int32" || atype == "int") && $pointer_arg == 1)
+        atype.push_back('*');
+    $$ = new FuncArg(atype, unamed);
+}
+
+func_arg : qualifiers TOK_IDENT[type] {
+    char unamed[10];
+    snprintf(unamed, 10, "_un%d", current_unamed_arg++);
+    $$ = new FuncArg($type, unamed);
+}
+
+func_arg : qualifiers TOK_IDENT[type] pointer_arg {
+    char unamed[10];
+    snprintf(unamed, 10, "_un%d", current_unamed_arg++);
+    string atype = $type;
+    if ((atype == "char" || atype == "int32" || atype == "int") && $pointer_arg == 1)
+        atype.push_back('*');
+    $$ = new FuncArg(atype, unamed);
+}
+
+// named parameters
 
 func_arg : TOK_IDENT[type] TOK_IDENT[name] {
     $$ = new FuncArg($type, $name);
@@ -178,13 +249,20 @@ func_arg : TOK_IDENT[type] TOK_IDENT[name] {
 
 func_arg : TOK_IDENT[type] '*' TOK_IDENT[name] {
     string atype = $type;
-    atype.push_back('*'); //TODO: check what to do with pointers as rob doesn't have them
+    if (atype == "char" || atype == "int32" || atype == "int")
+        atype.push_back('*');
+    $$ = new FuncArg(atype, $name);
+}
+
+func_arg : qualifiers TOK_IDENT[type] '*' TOK_IDENT[name] {
+    string atype = $type;
+    //atype.push_back('*'); //TODO: check what to do with pointers as rob doesn't have them
     $$ = new FuncArg(atype, $name);
 }
 
 func_arg : TOK_IDENT[type] '*' TOK_IDENT[name] '[' ']' {
     string atype = $type;
-    atype.push_back('*'); //TODO: check what to do with pointers as rob doesn't have them
+    //atype.push_back('*'); //TODO: check what to do with pointers as rob doesn't have them
     $$ = new FuncArg(atype, $name); //TODO: need [] or is just main arg?
 }
 
@@ -372,6 +450,10 @@ scalar_or_array : TOK_IDENT[id] {
 
 scalar_or_array : TOK_IDENT[id] '[' expr ']' {
     $$ = new LoadArray($id, $expr);
+}
+
+scalar_or_array : TOK_IDENT[id] '.' TOK_IDENT[id2] {
+    $$ = new LoadField($id, $id2);
 }
 
 scalar_or_array : TOK_IDENT[id] '[' expr ']' '.' TOK_IDENT[id2] {
